@@ -1,15 +1,3 @@
-Desgin a database of another e-commerce application closesly related to Daraz
-Features
-- user creation
-- agent creation
-- merchant creation
-- product
-- category
-- order_product
-- order
-- payment
-
-
 create database ecommerce_daraz;
 
 CREATE TABLE `ecommerce_daraz`.`user_creation` (
