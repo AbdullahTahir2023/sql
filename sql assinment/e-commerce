@@ -1,94 +1,76 @@
-Desgin a database of e-commerce application
-# tables
-- user
-- category
-- product
-- order_product
-- order
-- payment
+-- Create the database
+CREATE DATABASE ecommerce;
 
+-- Use the database
+USE ecommerce;
 
-create database ecommerce
+-- Create the Users table
+CREATE TABLE users (
+  user_id INT(11) NOT NULL AUTO_INCREMENT,
+  username VARCHAR(255) NOT NULL,
+  password VARCHAR(45) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  is_verified TINYINT(1) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id),
+  UNIQUE INDEX username_UNIQUE (username),
+  UNIQUE INDEX email_UNIQUE (email)
+) ENGINE = InnoDB;
 
-CREATE TABLE `ecommerce`.`users` (
-  `user_id` INT(11) NOT NULL AUTO_INCREMENT,
-  `user_name` VARCHAR(255) NULL,
-  `password` VARCHAR(45) NULL,
-  `email` VARCHAR(255) NULL,
-  `is_verified` TINYINT NULL DEFAULT 0,
-  `datetime` DATETIME NULL,
-  PRIMARY KEY (`user_id`),
-  UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
+-- Create the Category table
+CREATE TABLE category (
+  category_id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  category_name VARCHAR(255) NOT NULL,
+  category_description TEXT,
+  category_type ENUM('Physical', 'Digital') NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (category_id)
+) ENGINE = InnoDB;
 
+-- Create the Products table
+CREATE TABLE products (
+  product_id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  product_name VARCHAR(255) NOT NULL,
+  product_desc TEXT,
+  category_id INT(11) NOT NULL,
+  quantity_in_stock INT(11) NOT NULL DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (product_id),
+  FOREIGN KEY (category_id) REFERENCES category(category_id)
+) ENGINE = InnoDB;
 
-ALTER TABLE `ecommerce`.`users` 
-CHANGE COLUMN `user_name` `user_name` VARCHAR(255) NOT NULL ,
-CHANGE COLUMN `password` `password` VARCHAR(45) NOT NULL ,
-CHANGE COLUMN `email` `email` VARCHAR(255) NOT NULL ;
+-- Create the Orders table
+CREATE TABLE orders (
+  order_id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id INT(11) UNSIGNED NOT NULL,
+  order_date DATE NOT NULL,
+  status ENUM('Shipped', 'In Process', 'Canceled') NOT NULL,
+  comments TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (order_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id)
+) ENGINE = InnoDB;
 
+-- Create the Order_Product table
+CREATE TABLE order_product (
+  order_product_id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  order_id INT(11) NOT NULL,
+  product_id INT(11) NOT NULL,
+  quantity_ordered INT(11) NOT NULL,
+  price_each DECIMAL(10, 2) NOT NULL,
+  PRIMARY KEY (order_product_id),
+  FOREIGN KEY (order_id) REFERENCES orders(order_id),
+  FOREIGN KEY (product_id) REFERENCES products(product_id)
+) ENGINE = InnoDB;
 
-CREATE TABLE `ecommerce`.`category` (
-  `category_id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `category_name` VARCHAR(255) NOT NULL,
-  `category_description` TEXT(500) NULL,
-  `category_type` ENUM('Physical', 'Digital') NULL,
-  `datetime` DATETIME NULL,
-  PRIMARY KEY (`category_id`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
-
-
-CREATE TABLE `ecommerce`.`products` (
-  `product_id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `product_name` VARCHAR(255) NOT NULL,
-  `product_desc` TEXT(500) NULL,
-  `product_category` INT(11) NOT NULL,
-  `quantity_stock` INT(11) NOT NULL DEFAULT 0,
-  `datetime` DATETIME NOT NULL DEFAULT NOW(),
-  PRIMARY KEY (`product_id`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
-
-
-CREATE TABLE `ecommerce`.`order_product` (
-  `order_id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `product_id` INT(11) NOT NULL DEFAULT 0,
-  `quantity_ordered` INT(11) NOT NULL DEFAULT 0,
-  `price_each` INT(11) NOT NULL DEFAULT 0,
-  `created_date` DATETIME NULL,
-  PRIMARY KEY (`order_id`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
-
-
-CREATE TABLE `ecommerce`.`orders` (
-  `order_id` INT(11) UNSIGNED NOT NULL,
-  `user_id` INT(11) UNSIGNED NOT NULL,
-  `order_date` DATE NOT NULL,
-  `status` ENUM('Shipped', 'In Process', 'Canceled') NOT NULL,
-  `comments` TEXT(500) NULL,
-  `created_date` DATETIME NULL,
-  PRIMARY KEY (`order_id`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
-
-
-CREATE TABLE `ecommerce`.`payment` (
-  `user_id` INT(11) UNSIGNED NOT NULL,
-  `order_id` INT(11) UNSIGNED NOT NULL,
-  `amount` INT(11) UNSIGNED NOT NULL,
-  `payment_datetime` DATETIME NOT NULL,
-  PRIMARY KEY (`user_id`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
-
-
-ALTER TABLE `ecommerce`.`products` 
-ADD INDEX `product_name` (`product_name` ASC) VISIBLE;
-;
-
-ALTER TABLE `ecommerce`.`users` 
-ADD INDEX `idx_username` (`user_name` ASC) VISIBLE;
-;
+-- Create the Payments table
+CREATE TABLE payments (
+  payment_id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id INT(11) UNSIGNED NOT NULL,
+  order_id INT(11) UNSIGNED NOT NULL,
+  amount DECIMAL(10, 2) NOT NULL,
+  payment_datetime DATETIME NOT NULL,
+  PRIMARY KEY (payment_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id),
+  FOREIGN KEY (order_id) REFERENCES orders(order_id)
+) ENGINE = InnoDB;
