@@ -1,7 +1,5 @@
--- Create the e-commerce database
 CREATE DATABASE ecommerce_daraz;
 
--- Use the e-commerce database
 USE ecommerce_daraz;
 
 -- Create the Users table
