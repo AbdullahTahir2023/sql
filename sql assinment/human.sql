@@ -1,7 +1,5 @@
--- Create the HRM database
 CREATE DATABASE hrm_db;
 
--- Use the HRM database
 USE hrm_db;
 
 -- Create the Users table
