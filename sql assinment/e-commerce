@@ -1,43 +1,90 @@
--- Create the database
-CREATE DATABASE ecommerce;
+-- Create the e-commerce database
+CREATE DATABASE ecommerce_daraz;
 
--- Use the database
-USE ecommerce;
+-- Use the e-commerce database
+USE ecommerce_daraz;
 
 -- Create the Users table
 CREATE TABLE users (
-  user_id INT(11) NOT NULL AUTO_INCREMENT,
-  username VARCHAR(255) NOT NULL,
-  password VARCHAR(45) NOT NULL,
-  email VARCHAR(255) NOT NULL,
-  is_verified TINYINT(1) DEFAULT 0,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  user_id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_name VARCHAR(255) NOT NULL,
+  user_email VARCHAR(255) NOT NULL,
+  user_password VARCHAR(45) NOT NULL,
+  is_verified TINYINT NOT NULL DEFAULT 0,
+  created_datetime DATETIME NULL,
   PRIMARY KEY (user_id),
-  UNIQUE INDEX username_UNIQUE (username),
-  UNIQUE INDEX email_UNIQUE (email)
-) ENGINE = InnoDB;
+  UNIQUE INDEX user_email_UNIQUE (user_email ASC),
+  INDEX idx_username (user_name ASC)
+) ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+-- Create the Agent table
+CREATE TABLE agent (
+  agent_id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id INT(11) UNSIGNED NOT NULL,
+  agent_created_datetime DATETIME NULL,
+  PRIMARY KEY (agent_id),
+  INDEX idx_agent_user_idx (user_id ASC),
+  CONSTRAINT idx_agent_user
+    FOREIGN KEY (user_id)
+    REFERENCES users (user_id)
+    ON DELETE RESTRICT
+    ON UPDATE RESTRICT
+) ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+-- Create the Merchant table
+CREATE TABLE merchant (
+  merchant_id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  agent_id INT(11) UNSIGNED NOT NULL,
+  user_id INT(11) UNSIGNED NOT NULL,
+  created_datetime DATETIME NULL,
+  PRIMARY KEY (merchant_id),
+  INDEX fk_agent_id_idx (agent_id ASC),
+  INDEX fk_user_id_idx (user_id ASC),
+  CONSTRAINT fk_agent_id
+    FOREIGN KEY (agent_id)
+    REFERENCES agent (agent_id)
+    ON DELETE RESTRICT
+    ON UPDATE RESTRICT,
+  CONSTRAINT fk_user_id
+    FOREIGN KEY (user_id)
+    REFERENCES users (user_id)
+    ON DELETE RESTRICT
+    ON UPDATE RESTRICT
+) ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+-- Create the Products table
+CREATE TABLE products (
+  product_id INT(11) NOT NULL AUTO_INCREMENT,
+  product_name VARCHAR(255) NOT NULL,
+  product_desc TEXT(500) NULL,
+  quantity INT(11) UNSIGNED NOT NULL DEFAULT 0,
+  product_category INT(11) UNSIGNED NOT NULL,
+  merchant_id INT(11) UNSIGNED NOT NULL,
+  created_datetime DATETIME NULL,
+  PRIMARY KEY (product_id),
+  INDEX idx_product_name (product_name ASC),
+  INDEX idx_merchant_id_idx (merchant_id ASC),
+  CONSTRAINT idx_merchant_id
+    FOREIGN KEY (merchant_id)
+    REFERENCES merchant (merchant_id)
+    ON DELETE RESTRICT
+    ON UPDATE RESTRICT
+) ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
 
 -- Create the Category table
 CREATE TABLE category (
   category_id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
   category_name VARCHAR(255) NOT NULL,
-  category_description TEXT,
-  category_type ENUM('Physical', 'Digital') NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  category_desc TEXT(500) NULL,
+  category_type ENUM('Digital', 'Physical') NOT NULL,
+  created_datetime DATETIME NULL,
   PRIMARY KEY (category_id)
-) ENGINE = InnoDB;
-
--- Create the Products table
-CREATE TABLE products (
-  product_id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-  product_name VARCHAR(255) NOT NULL,
-  product_desc TEXT,
-  category_id INT(11) NOT NULL,
-  quantity_in_stock INT(11) NOT NULL DEFAULT 0,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (product_id),
-  FOREIGN KEY (category_id) REFERENCES category(category_id)
-) ENGINE = InnoDB;
+) ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
 
 -- Create the Orders table
 CREATE TABLE orders (
@@ -45,32 +92,29 @@ CREATE TABLE orders (
   user_id INT(11) UNSIGNED NOT NULL,
   order_date DATE NOT NULL,
   status ENUM('Shipped', 'In Process', 'Canceled') NOT NULL,
-  comments TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (order_id),
-  FOREIGN KEY (user_id) REFERENCES users(user_id)
-) ENGINE = InnoDB;
+  comments TEXT(500) NULL,
+  created_date DATETIME NULL,
+  PRIMARY KEY (order_id)
+) ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
 
 -- Create the Order_Product table
 CREATE TABLE order_product (
-  order_product_id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-  order_id INT(11) NOT NULL,
-  product_id INT(11) NOT NULL,
-  quantity_ordered INT(11) NOT NULL,
-  price_each DECIMAL(10, 2) NOT NULL,
-  PRIMARY KEY (order_product_id),
-  FOREIGN KEY (order_id) REFERENCES orders(order_id),
-  FOREIGN KEY (product_id) REFERENCES products(product_id)
-) ENGINE = InnoDB;
+  order_id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  product_id INT(11) NOT NULL DEFAULT 0,
+  quantity_ordered INT(11) NOT NULL DEFAULT 0,
+  price_each INT(11) NOT NULL DEFAULT 0,
+  created_date DATETIME NULL,
+  PRIMARY KEY (order_id)
+) ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
 
--- Create the Payments table
-CREATE TABLE payments (
-  payment_id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+-- Create the Payment table
+CREATE TABLE payment (
   user_id INT(11) UNSIGNED NOT NULL,
   order_id INT(11) UNSIGNED NOT NULL,
-  amount DECIMAL(10, 2) NOT NULL,
+  amount INT(11) UNSIGNED NOT NULL,
   payment_datetime DATETIME NOT NULL,
-  PRIMARY KEY (payment_id),
-  FOREIGN KEY (user_id) REFERENCES users(user_id),
-  FOREIGN KEY (order_id) REFERENCES orders(order_id)
-) ENGINE = InnoDB;
+  PRIMARY KEY (user_id)
+) ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
